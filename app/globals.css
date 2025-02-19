@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+@font-face {
+  font-family: 'BinancePlex';
+  font-display: swap;
+  src: url('../public/fonts/BinancePlex-Regular.woff2') format('woff2');
+  font-weight: 400
+}
+
+@font-face {
+  font-family: 'BinancePlex';
+  font-display: swap;
+  src: url('../public/fonts/BinancePlex-Medium.woff2') format('woff2');
+  font-weight: 500
+}
+
+@font-face {
+  font-family: 'NotoSansSinhala';
+  font-display: swap;
+  src: url('../public/fonts/NotoSansSinhala-Medium.woff2') format('woff2');
+  font-weight: 500
+}
+
+@font-face {
+  font-family: 'BinancePlex';
+  font-display: swap;
+  src: url('../public/fonts/BinancePlex-SemiBold.woff2') format('woff2');
+  font-weight: 600
+}
+
+@font-face {
+  font-family: 'BinancePlex';
+  font-display: swap;
+  src: url('../public/fonts/BinancePlex-SemiBold.woff2') format('woff2');
+  font-weight: 700
+}
+
+@font-face {
+  font-family: 'BinancePlex';
+  font-display: swap;
+  src: url('../public/fonts/BinancePlex-SemiBold.woff2') format('woff2');
+  font-weight: 800
+}
+
+@font-face {
+  font-family: 'NotoSansSinhala';
+  font-display: swap;
+  src: url('../public/fonts/NotoSansSinhala-SemiBold.woff2') format('woff2');
+  font-weight: 600
+}
+
+@font-face {
+  font-family: 'NotoSansSinhala';
+  font-display: swap;
+  src: url('../public/fonts/NotoSansSinhala-SemiBold.woff2') format('woff2');
+  font-weight: 700
+}
+
+@font-face {
+  font-family: 'NotoSansSinhala';
+  font-display: swap;
+  src: url('../public/fonts/NotoSansSinhala-SemiBold.woff2') format('woff2');
+  font-weight: 800
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: BinancePlex, NotoSansSinhala, Arial, sans-serif !important;
+}
