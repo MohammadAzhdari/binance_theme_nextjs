@@ -21,17 +21,17 @@ export default function Home() {
 
   const wallets = [
     {
-      name: "MetaMask",
+      name: "BTC Deposit",
       icon: <FaWallet className="text-2xl" />,
       address: "0x4D3d5CA8bB3C9f4EdE2C5E20F2D3dF3bB3C9f4Ed",
     },
     {
-      name: "Trust Wallet",
+      name: "ETH Deposit",
       icon: <FaCoins className="text-2xl" />,
       address: "0x9A8E7fE2E4D3d5CA8bB3C9f4EdE2C5E20F2D3dF3",
     },
     {
-      name: "Binance Chain",
+      name: "USDT Deposit",
       icon: <FaExchangeAlt className="text-2xl" />,
       address: "bnb1tq9d4p357d4p357d4p357d4p357d4p357d9qk",
     },
