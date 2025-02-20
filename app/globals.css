@@ -82,3 +82,30 @@ body {
   background: var(--background);
   font-family: BinancePlex, NotoSansSinhala, Arial, sans-serif !important;
 }
+
+@keyframes slide-up {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out;
+}
+@keyframes pop-in {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.animate-pop-in {
+  animation: pop-in 0.3s ease-out;
+}
