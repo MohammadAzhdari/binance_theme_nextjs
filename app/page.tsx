@@ -37,11 +37,6 @@ export default function Home() {
     },
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCurrentStep(2);
-  };
-
   const copyToClipboard = (address: string) => {
     navigator.clipboard.writeText(address);
     setShowCopiedDialog(true);
@@ -172,7 +167,6 @@ export default function Home() {
               <h2 className="text-2xl text-white font-semibold mb-6">
                 Welcome!
               </h2>
-              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <div>
                   <h5 className="text-md text-white mb-2">
                     1 - Go to next step!
@@ -188,12 +182,11 @@ export default function Home() {
                   </h5>
                 </div>
                 <button
-                  type="submit"
+                  onClick={() => setCurrentStep(2)}
                   className="w-full bg-[#f2c118] text-black p-3 rounded-lg hover:bg-[#d1a10f] transition-colors"
                 >
                   Next
                 </button>
-              </form>
             </div>
           )}
 
