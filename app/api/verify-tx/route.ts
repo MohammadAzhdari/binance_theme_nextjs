@@ -2,27 +2,39 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   const { txId, currency, address } = await request.json();
-
+  
   try {
-    // Server-side API call to blockchain explorer
-    const apiUrl = `https://api.blockcypher.com/v1/${currency.toLowerCase()}/main/txs/${txId}`;
-    const response = await fetch(apiUrl);
-    console.log(apiUrl);
-    if (!response.ok) {
-      return NextResponse.json(
-        { valid: false, error: "Transaction not found" },
-        { status: 400 }
-      );
+    let isValid = false;
+    
+    if (currency === 'USDT') {
+      // Check if ERC-20 (Ethereum) transaction
+      if (txId.startsWith('0x')) {
+        const API_KEY = process.env.ETHERSCAN_API_KEY;
+        const url = `https://api.etherscan.io/api?module=proxy&action=eth_getTransactionByHash&txhash=${txId}&apikey=${API_KEY}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        isValid = data.result?.to?.toLowerCase() === address.toLowerCase();
+      }
+      // Check if TRC-20 (Tron) transaction
+      else {
+        const url = `https://apilist.tronscan.org/api/transaction-info?hash=${txId}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        isValid = data.contractData?.contract_address === address;
+      }
+    } else {
+      // Handle other currencies (BTC, ETH)
+      const response = await fetch(`https://api.blockcypher.com/v1/${currency}/main/txs/${txId}`);
+      const data = await response.json();
+      isValid = data.addresses?.includes(address);
     }
-
-    const data = await response.json();
-    const isValid = data.addresses?.includes(address);
 
     return NextResponse.json({ valid: isValid });
   } catch (error) {
-    console.error('Server verification error:', error);
+    console.error('Verification error:', error);
     return NextResponse.json(
-      { valid: false, error: "Internal server error" },
+      { valid: false, error: "Transaction verification failed" },
       { status: 500 }
     );
   }

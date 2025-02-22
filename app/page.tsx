@@ -46,7 +46,7 @@ export default function Home() {
       name: "USDT Deposit",
       currency: "USDT",
       icon: <SiTether />,
-      address: "bnb1tq9d4p357d4p357d4p357d4p357d4p357d9qk",//f98f1efaae7b242eb57bf05d1ef903b0e66f8427c9891a70105581bf16a0d82a
+      address: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",//f98f1efaae7b242eb57bf05d1ef903b0e66f8427c9891a70105581bf16a0d82a
       imagePath: "download.png",
       regex: /^[A-Za-z0-9]{64}$/,
     },
