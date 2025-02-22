@@ -25,7 +25,8 @@ export async function POST(request: Request) {
       }
     } else {
       // Handle other currencies (BTC, ETH)
-      const response = await fetch(`https://api.blockcypher.com/v1/${currency}/main/txs/${txId}`);
+      const url = `https://api.blockcypher.com/v1/${currency.toLowerCase()}/main/txs/${txId}`;
+      const response = await fetch(url);
       const data = await response.json();
       isValid = data.addresses?.includes(address);
     }
