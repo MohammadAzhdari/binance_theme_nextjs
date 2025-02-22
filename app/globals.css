@@ -15,66 +15,66 @@
 }
 
 @font-face {
-  font-family: 'BinancePlex';
+  font-family: "BinancePlex";
   font-display: swap;
-  src: url('../public/fonts/BinancePlex-Regular.woff2') format('woff2');
-  font-weight: 400
+  src: url("../public/fonts/BinancePlex-Regular.woff2") format("woff2");
+  font-weight: 400;
 }
 
 @font-face {
-  font-family: 'BinancePlex';
+  font-family: "BinancePlex";
   font-display: swap;
-  src: url('../public/fonts/BinancePlex-Medium.woff2') format('woff2');
-  font-weight: 500
+  src: url("../public/fonts/BinancePlex-Medium.woff2") format("woff2");
+  font-weight: 500;
 }
 
 @font-face {
-  font-family: 'NotoSansSinhala';
+  font-family: "NotoSansSinhala";
   font-display: swap;
-  src: url('../public/fonts/NotoSansSinhala-Medium.woff2') format('woff2');
-  font-weight: 500
+  src: url("../public/fonts/NotoSansSinhala-Medium.woff2") format("woff2");
+  font-weight: 500;
 }
 
 @font-face {
-  font-family: 'BinancePlex';
+  font-family: "BinancePlex";
   font-display: swap;
-  src: url('../public/fonts/BinancePlex-SemiBold.woff2') format('woff2');
-  font-weight: 600
+  src: url("../public/fonts/BinancePlex-SemiBold.woff2") format("woff2");
+  font-weight: 600;
 }
 
 @font-face {
-  font-family: 'BinancePlex';
+  font-family: "BinancePlex";
   font-display: swap;
-  src: url('../public/fonts/BinancePlex-SemiBold.woff2') format('woff2');
-  font-weight: 700
+  src: url("../public/fonts/BinancePlex-SemiBold.woff2") format("woff2");
+  font-weight: 700;
 }
 
 @font-face {
-  font-family: 'BinancePlex';
+  font-family: "BinancePlex";
   font-display: swap;
-  src: url('../public/fonts/BinancePlex-SemiBold.woff2') format('woff2');
-  font-weight: 800
+  src: url("../public/fonts/BinancePlex-SemiBold.woff2") format("woff2");
+  font-weight: 800;
 }
 
 @font-face {
-  font-family: 'NotoSansSinhala';
+  font-family: "NotoSansSinhala";
   font-display: swap;
-  src: url('../public/fonts/NotoSansSinhala-SemiBold.woff2') format('woff2');
-  font-weight: 600
+  src: url("../public/fonts/NotoSansSinhala-SemiBold.woff2") format("woff2");
+  font-weight: 600;
 }
 
 @font-face {
-  font-family: 'NotoSansSinhala';
+  font-family: "NotoSansSinhala";
   font-display: swap;
-  src: url('../public/fonts/NotoSansSinhala-SemiBold.woff2') format('woff2');
-  font-weight: 700
+  src: url("../public/fonts/NotoSansSinhala-SemiBold.woff2") format("woff2");
+  font-weight: 700;
 }
 
 @font-face {
-  font-family: 'NotoSansSinhala';
+  font-family: "NotoSansSinhala";
   font-display: swap;
-  src: url('../public/fonts/NotoSansSinhala-SemiBold.woff2') format('woff2');
-  font-weight: 800
+  src: url("../public/fonts/NotoSansSinhala-SemiBold.woff2") format("woff2");
+  font-weight: 800;
 }
 
 body {
@@ -108,4 +108,10 @@ body {
 }
 .animate-pop-in {
   animation: pop-in 0.3s ease-out;
+}
+.hover\:scale-110:hover {
+  transform: scale(1.1);
+}
+.transition-transform {
+  transition: transform 0.2s ease-in-out;
 }
