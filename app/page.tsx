@@ -22,7 +22,6 @@ export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showCopiedDialog, setShowCopiedDialog] = useState(false);
-  const [showTxDialog, setShowTxDialog] = useState(false);
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const [showQrModal, setShowQrModal] = useState(false);
   const [selectedQrImage, setSelectedQrImage] = useState("");
@@ -406,14 +405,6 @@ export default function Home() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-[#2b2f36] p-6 rounded-lg text-white animate-pop-in">
             <p>✓ Address copied to clipboard!</p>
-          </div>
-        </div>
-      )}
-
-      {showTxDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[#2b2f36] p-6 rounded-lg text-white animate-pop-in">
-            <p>✓ Transaction verified successfully!</p>
           </div>
         </div>
       )}
