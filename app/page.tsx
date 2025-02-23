@@ -9,12 +9,12 @@ import {
   FaCheck,
   FaRegWindowClose,
 } from "react-icons/fa";
+import { BiMessageSquareError } from "react-icons/bi";
 import { SiTether } from "react-icons/si";
 import { validateTransaction } from "./actions";
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [txId, setTxId] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showCopiedDialog, setShowCopiedDialog] = useState(false);
   const [showTxDialog, setShowTxDialog] = useState(false);
@@ -52,6 +52,54 @@ export default function Home() {
     },
   ];
 
+  const [txInputs, setTxInputs] = useState(
+    wallets.map(() => ({
+      txId: "",
+      verified: false,
+      verifying: false,
+      error: '',
+    }))
+  );
+
+  const handleTxInputChange = (index: number, value: string) => {
+    const newTxInputs = [...txInputs];
+    newTxInputs[index].txId = value;
+    newTxInputs[index].error = '';
+    setTxInputs(newTxInputs);
+  };
+
+  const handleVerifyTxForWallet = async (index: number) => {
+    const newTxInputs = [...txInputs];
+    newTxInputs[index].verifying = true;
+    newTxInputs[index].error = '';
+    setTxInputs(newTxInputs);
+
+    const wallet = wallets[index];
+    const txIdValue = newTxInputs[index].txId;
+
+    const result = await validateTransaction(
+      txIdValue,
+      wallet.currency,
+      wallet.address,
+      wallet.regex
+    );
+    newTxInputs[index].verifying = false;
+    if (result.valid) {
+      newTxInputs[index].verified = true;
+      newTxInputs[index].error = '';
+      setTxInputs(newTxInputs);
+      setShowTxDialog(true);
+      setTimeout(() => setShowTxDialog(false), 2000);
+    } else {
+      newTxInputs[index].verified = false;
+      newTxInputs[index].error =
+        result.error || result.message || "Verification failed";
+      setTxInputs(newTxInputs);
+      setToastMessage(newTxInputs[index].error);
+      setShowToast(true);
+    }
+  };
+
   const closeTaost = () => {
     setShowToast(false);
   };
@@ -60,36 +108,6 @@ export default function Home() {
     navigator.clipboard.writeText(address);
     setShowCopiedDialog(true);
     setTimeout(() => setShowCopiedDialog(false), 1000);
-  };
-
-  const handleCheckTx = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (selectedCurrency === null) {
-      setToastMessage("Please select a currency");
-      setShowToast(true);
-      return;
-    }
-
-    const selectedWallet = wallets[selectedCurrency];
-
-    const result = await validateTransaction(
-      txId,
-      selectedWallet.currency,
-      selectedWallet.address,
-      selectedWallet.regex
-    );
-
-    if (result.valid) {
-      setShowTxDialog(true);
-      setTimeout(() => {
-        setShowTxDialog(false);
-        setCurrentStep(4);
-      }, 2000);
-    } else {
-      setToastMessage(result.error || result.message || "Verification failed");
-      setShowToast(true);
-    }
   };
 
   return (
@@ -305,47 +323,59 @@ export default function Home() {
               <h2 className="text-2xl text-white font-semibold mb-6">
                 Verify Transaction
               </h2>
-              <form onSubmit={handleCheckTx} className="space-y-6">
-                <div className="flex gap-4">
-                  <select
-                    value={selectedCurrency ?? ""}
-                    onChange={(e) =>
-                      setSelectedCurrency(Number(e.target.value))
-                    }
-                    className="flex-1 p-3 rounded-md bg-[#2b2f36] text-white border border-[#666]"
-                    required
-                  >
-                    <option value="">Select Currency</option>
-                    {wallets.map((wallet, index) => (
-                      <option key={wallet.name} value={index}>
+              {wallets.map((wallet, index) => (
+                <div key={wallet.name} className="mb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[#f2c118] text-3xl">
+                        {wallet.icon}
+                      </span>
+                      <h5 className="text-white font-medium">
                         {wallet.name}
-                      </option>
-                    ))}
-                  </select>
-                  {selectedCurrency !== null && (
-                    <span className="text-[#f2c118] text-4xl p-3">
-                      {wallets[selectedCurrency].icon}
-                    </span>
-                  )}
+                      </h5>
+                    </div>
+                  </div>
+                  <div className="flex items-center mt-2">
+                    <button
+                      type="button"
+                      onClick={() => handleVerifyTxForWallet(index)}
+                      disabled={
+                        txInputs[index].verifying ||
+                        !txInputs[index].txId ||
+                        txInputs[index].verified
+                      }
+                      className="p-2 bg-[#f2c118] text-black rounded-md hover:bg-[#d1a10f] disabled:opacity-50 transition-colors"
+                    >
+                      {txInputs[index].verifying ? "Verifying..." : "Verify"}
+                    </button>
+                    <input
+                      type="text"
+                      value={txInputs[index].txId}
+                      onChange={(e) =>
+                        handleTxInputChange(index, e.target.value)
+                      }
+                      disabled={txInputs[index].verified}
+                      className="flex-1 ml-2 p-3 rounded-md text-white border border-[#666] bg-[#181a20] focus:outline-none focus:ring-1 focus:ring-[#f2c118]"
+                      placeholder={`Enter ${wallet.name} Transaction ID`}
+                    />
+                    {txInputs[index].verified && (
+                      <FaCheck className="ml-2 text-green-500 text-xl" />
+                    )}
+                    {!txInputs[index].verified && txInputs[index].error && (
+                      <BiMessageSquareError className="ml-2 text-red-500 text-xl" />
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <h5 className="text-sm text-white mb-2">Transaction ID</h5>
-                  <input
-                    type="text"
-                    value={txId}
-                    onChange={(e) => setTxId(e.target.value)}
-                    className="w-full p-3 rounded-md text-white border border-[#666] bg-[#181a20] focus:outline-none focus:ring-1 focus:ring-[#f2c118]"
-                    placeholder="Enter your transaction ID"
-                    required
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-[#f2c118] text-black p-3 rounded-lg hover:bg-[#d1a10f] transition-colors"
-                >
-                  Verify
-                </button>
-              </form>
+              ))}
+              <button
+                onClick={() => setCurrentStep(4)}
+                disabled={!txInputs.some((input) => input.verified)}
+                className="w-full mt-6 bg-[#f2c118] text-black p-3 rounded-lg hover:bg-[#d1a10f] transition-colors disabled:opacity-50"
+              >
+                {txInputs.some((input) => input.verified)
+                  ? "Next"
+                  : "One transaction is required"}
+              </button>
             </div>
           )}
 
