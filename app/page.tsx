@@ -1,5 +1,11 @@
 "use client";
 
+interface VerificationStatus {
+  verified: boolean;
+  txId: string;
+  error?: string;
+}
+
 import { useState, useEffect } from "react";
 import {
   FaBars,
@@ -9,7 +15,6 @@ import {
   FaCheck,
   FaRegWindowClose,
 } from "react-icons/fa";
-import { BiMessageSquareError } from "react-icons/bi";
 import { SiTether } from "react-icons/si";
 import { validateTransaction } from "./actions";
 
@@ -24,13 +29,14 @@ export default function Home() {
   const [selectedCurrency, setSelectedCurrency] = useState<number | null>(null);
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
+  const [anyVerified, setAnyVerified] = useState(false);
 
   const wallets = [
     {
       name: "BTC Deposit",
       currency: "BTC",
       icon: <FaBtc />,
-      address: "1Q2TWHE3GMdB6BZKafqwxXtWAWgFt5Jvm3",//f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16
+      address: "1Q2TWHE3GMdB6BZKafqwxXtWAWgFt5Jvm3", //f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16
       imagePath: "download.png",
       regex: /^[a-fA-F0-9]{64}$/,
     },
@@ -38,7 +44,7 @@ export default function Home() {
       name: "ETH Deposit",
       currency: "ETH",
       icon: <FaEthereum />,
-      address: "51981370e2ca51bc8ff6fa96f3c272e1cfb00bc9",//0x2e395dc89170411d10632fa02632676a69545e8de2198af4fddb127efbcbd335
+      address: "51981370e2ca51bc8ff6fa96f3c272e1cfb00bc9", //0x2e395dc89170411d10632fa02632676a69545e8de2198af4fddb127efbcbd335
       imagePath: "download.png",
       regex: /^0x[a-fA-F0-9]{64}$/,
     },
@@ -46,59 +52,15 @@ export default function Home() {
       name: "USDT Deposit",
       currency: "USDT",
       icon: <SiTether />,
-      address: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",//f98f1efaae7b242eb57bf05d1ef903b0e66f8427c9891a70105581bf16a0d82a
+      address: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t", //f98f1efaae7b242eb57bf05d1ef903b0e66f8427c9891a70105581bf16a0d82a
       imagePath: "download.png",
       regex: /^[A-Za-z0-9]{64}$/,
     },
   ];
 
-  const [txInputs, setTxInputs] = useState(
-    wallets.map(() => ({
-      txId: "",
-      verified: false,
-      verifying: false,
-      error: '',
-    }))
+  const [verifications, setVerifications] = useState<VerificationStatus[]>(
+    wallets.map(() => ({ verified: false, txId: "" }))
   );
-
-  const handleTxInputChange = (index: number, value: string) => {
-    const newTxInputs = [...txInputs];
-    newTxInputs[index].txId = value;
-    newTxInputs[index].error = '';
-    setTxInputs(newTxInputs);
-  };
-
-  const handleVerifyTxForWallet = async (index: number) => {
-    const newTxInputs = [...txInputs];
-    newTxInputs[index].verifying = true;
-    newTxInputs[index].error = '';
-    setTxInputs(newTxInputs);
-
-    const wallet = wallets[index];
-    const txIdValue = newTxInputs[index].txId;
-
-    const result = await validateTransaction(
-      txIdValue,
-      wallet.currency,
-      wallet.address,
-      wallet.regex
-    );
-    newTxInputs[index].verifying = false;
-    if (result.valid) {
-      newTxInputs[index].verified = true;
-      newTxInputs[index].error = '';
-      setTxInputs(newTxInputs);
-      setShowTxDialog(true);
-      setTimeout(() => setShowTxDialog(false), 2000);
-    } else {
-      newTxInputs[index].verified = false;
-      newTxInputs[index].error =
-        result.error || result.message || "Verification failed";
-      setTxInputs(newTxInputs);
-      setToastMessage(newTxInputs[index].error);
-      setShowToast(true);
-    }
-  };
 
   const closeTaost = () => {
     setShowToast(false);
@@ -108,6 +70,34 @@ export default function Home() {
     navigator.clipboard.writeText(address);
     setShowCopiedDialog(true);
     setTimeout(() => setShowCopiedDialog(false), 1000);
+  };
+
+  const handleCheckTx = async (wallet: (typeof wallets)[0], index: number) => {
+    const txId = verifications[index].txId;
+    if (!txId) {
+      setToastMessage("Please enter a transaction ID");
+      setShowToast(true);
+      return;
+    }
+
+    const result = await validateTransaction(
+      txId,
+      wallet.currency,
+      wallet.address,
+      wallet.regex
+    );
+
+    const newVerifications = [...verifications];
+    if (result.valid) {
+      newVerifications[index].verified = true;
+      newVerifications[index].error = undefined;
+      setAnyVerified(true);
+    } else {
+      newVerifications[index].error = result.error || "Verification failed";
+      setToastMessage(newVerifications[index].error);
+      setShowToast(true);
+    }
+    setVerifications(newVerifications);
   };
 
   return (
@@ -321,61 +311,76 @@ export default function Home() {
           {currentStep === 3 && (
             <div className="animate-slide-up">
               <h2 className="text-2xl text-white font-semibold mb-6">
-                Verify Transaction
+                Verify Transactions
               </h2>
-              {wallets.map((wallet, index) => (
-                <div key={wallet.name} className="mb-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[#f2c118] text-3xl">
+              <div className="space-y-6">
+                {wallets.map((wallet, index) => (
+                  <div key={wallet.name} className="relative group">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[#f2c118] text-xl">
                         {wallet.icon}
                       </span>
-                      <h5 className="text-white font-medium">
-                        {wallet.name}
-                      </h5>
+                      <h5 className="text-sm text-white">{wallet.name}</h5>
                     </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={verifications[index].txId}
+                        onChange={(e) => {
+                          const newVerifications = [...verifications];
+                          newVerifications[index].txId = e.target.value;
+                          newVerifications[index].verified = false;
+                          setVerifications(newVerifications);
+                        }}
+                        className={`w-full p-3 rounded-md text-white border ${
+                          verifications[index].verified
+                            ? "border-green-500 bg-green-900/20"
+                            : "border-[#666] bg-[#181a20]"
+                        } focus:outline-none focus:ring-1 focus:ring-[#f2c118]`}
+                        placeholder="Enter transaction ID"
+                        disabled={verifications[index].verified}
+                      />
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          await handleCheckTx(wallet, index);
+                        }}
+                        className={`px-4 rounded-md transition-colors ${
+                          verifications[index].verified
+                            ? "bg-green-500 hover:bg-green-600"
+                            : "bg-[#f2c118] hover:bg-[#d1a10f]"
+                        }`}
+                        disabled={verifications[index].verified}
+                      >
+                        {verifications[index].verified ? (
+                          <FaCheck className="text-white" />
+                        ) : (
+                          "Verify"
+                        )}
+                      </button>
+                    </div>
+                    {verifications[index].error &&
+                      !verifications[index].verified && (
+                        <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                          <FaRegWindowClose />
+                          {verifications[index].error}
+                        </div>
+                      )}
                   </div>
-                  <div className="flex items-center mt-2">
-                    <button
-                      type="button"
-                      onClick={() => handleVerifyTxForWallet(index)}
-                      disabled={
-                        txInputs[index].verifying ||
-                        !txInputs[index].txId ||
-                        txInputs[index].verified
-                      }
-                      className="p-2 bg-[#f2c118] text-black rounded-md hover:bg-[#d1a10f] disabled:opacity-50 transition-colors"
-                    >
-                      {txInputs[index].verifying ? "Verifying..." : "Verify"}
-                    </button>
-                    <input
-                      type="text"
-                      value={txInputs[index].txId}
-                      onChange={(e) =>
-                        handleTxInputChange(index, e.target.value)
-                      }
-                      disabled={txInputs[index].verified}
-                      className="flex-1 ml-2 p-3 rounded-md text-white border border-[#666] bg-[#181a20] focus:outline-none focus:ring-1 focus:ring-[#f2c118]"
-                      placeholder={`Enter ${wallet.name} Transaction ID`}
-                    />
-                    {txInputs[index].verified && (
-                      <FaCheck className="ml-2 text-green-500 text-xl" />
-                    )}
-                    {!txInputs[index].verified && txInputs[index].error && (
-                      <BiMessageSquareError className="ml-2 text-red-500 text-xl" />
-                    )}
-                  </div>
-                </div>
-              ))}
-              <button
-                onClick={() => setCurrentStep(4)}
-                disabled={!txInputs.some((input) => input.verified)}
-                className="w-full mt-6 bg-[#f2c118] text-black p-3 rounded-lg hover:bg-[#d1a10f] transition-colors disabled:opacity-50"
-              >
-                {txInputs.some((input) => input.verified)
-                  ? "Next"
-                  : "One transaction is required"}
-              </button>
+                ))}
+
+                <button
+                  onClick={() => setCurrentStep(4)}
+                  disabled={!anyVerified}
+                  className={`w-full p-3 rounded-lg transition-colors ${
+                    anyVerified
+                      ? "bg-[#f2c118] hover:bg-[#d1a10f] text-black"
+                      : "bg-gray-600 cursor-not-allowed text-gray-400"
+                  }`}
+                >
+                  {anyVerified ? "Next" : "At least one transaction required"}
+                </button>
+              </div>
             </div>
           )}
 
