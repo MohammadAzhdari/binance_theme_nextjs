@@ -1,11 +1,5 @@
 "use client";
 
-interface VerificationStatus {
-  verified: boolean;
-  txId: string;
-  error?: string;
-}
-
 import { useState, useEffect } from "react";
 import {
   FaBars,
@@ -17,6 +11,12 @@ import {
 } from "react-icons/fa";
 import { SiTether } from "react-icons/si";
 import { validateTransaction } from "./actions";
+
+interface VerificationStatus {
+  verified: boolean;
+  txId: string;
+  error?: string;
+}
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
