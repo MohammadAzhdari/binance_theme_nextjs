@@ -25,7 +25,6 @@ export default function Home() {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const [showQrModal, setShowQrModal] = useState(false);
   const [selectedQrImage, setSelectedQrImage] = useState("");
-  const [selectedCurrency, setSelectedCurrency] = useState<number | null>(null);
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [anyVerified, setAnyVerified] = useState(false);
