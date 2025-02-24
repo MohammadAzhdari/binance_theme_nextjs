@@ -2,9 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   const { txId, currency, address } = await request.json();
-  console.log(txId);
-  console.log(currency);
-  console.log(address);
+
   try {
     let isValid = false;
     let amount = "0.00";
