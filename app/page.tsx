@@ -10,7 +10,10 @@ import {
   FaRegWindowClose,
 } from "react-icons/fa";
 import { SiTether } from "react-icons/si";
+import { RiXrpFill } from "react-icons/ri";
+import { BiMessageSquareError } from "react-icons/bi";
 import { validateTransaction } from "./actions";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface VerificationStatus {
   verified: boolean;
@@ -28,6 +31,10 @@ export default function Home() {
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [anyVerified, setAnyVerified] = useState(false);
+  const [transactionDetails, setTransactionDetails] = useState<{
+    [key: string]: string;
+  }>({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const wallets = [
     {
@@ -35,24 +42,48 @@ export default function Home() {
       currency: "BTC",
       icon: <FaBtc />,
       address: "1Q2TWHE3GMdB6BZKafqwxXtWAWgFt5Jvm3", //f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16
-      imagePath: "download.png",
+      imagePath: "Bitcoin.jpg",
       regex: /^[a-fA-F0-9]{64}$/,
     },
     {
-      name: "ETH Deposit",
+      name: "ETH Deposit (eth network)",
       currency: "ETH",
       icon: <FaEthereum />,
       address: "51981370e2ca51bc8ff6fa96f3c272e1cfb00bc9", //0x2e395dc89170411d10632fa02632676a69545e8de2198af4fddb127efbcbd335
-      imagePath: "download.png",
+      imagePath: "Eth-eth.jpg",
       regex: /^0x[a-fA-F0-9]{64}$/,
     },
     {
-      name: "USDT Deposit",
+      name: "USDT Deposit (eth network)",
       currency: "USDT",
       icon: <SiTether />,
       address: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t", //f98f1efaae7b242eb57bf05d1ef903b0e66f8427c9891a70105581bf16a0d82a
-      imagePath: "download.png",
-      regex: /^[A-Za-z0-9]{64}$/,
+      imagePath: "USDT-eth.jpg",
+      regex: /^0x[a-fA-F0-9]{64}$/,
+    },
+    // {
+    //   name: "USDT (TRC-20)",
+    //   currency: "USDT",
+    //   icon: <SiTether />,
+    //   address: "T...", // TRC-20 address
+    //   imagePath: "download.png",
+    //   regex: /^[a-fA-F0-9]{64}$/,
+    // },
+    // {
+    //   name: "USDT (BEP-20)",
+    //   currency: "USDT",
+    //   icon: <SiTether />,
+    //   address: "0x55d398326f99059fF775485246999027B3197955",
+    //   imagePath: "download.png",
+    //   regex: /^0x[a-fA-F0-9]{64}$/,
+    // },
+    {
+      name: "XRP Deposit",
+      currency: "XRP",
+      icon: <RiXrpFill />,
+      address: "rNzw1DBohfJAswmmeRraMpxH38pLpsrK1K", // 4135B91DE30641819D97284FEA39A0A988DFBD44EEEB3DF7FEF6AEA94ECC34D0
+      imagePath: "XRP.jpg",
+      regex: /^[A-Fa-f0-9]{64}$/,
     },
   ];
 
@@ -78,24 +109,46 @@ export default function Home() {
       return;
     }
 
-    const result = await validateTransaction(
-      txId,
-      wallet.currency,
-      wallet.address,
-      wallet.regex
-    );
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/verify-tx", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          txId,
+          currency: wallet.currency,
+          address: wallet.address,
+        }),
+      });
 
-    const newVerifications = [...verifications];
-    if (result.valid) {
-      newVerifications[index].verified = true;
-      newVerifications[index].error = undefined;
-      setAnyVerified(true);
-    } else {
-      newVerifications[index].error = result.error || "Verification failed";
-      setToastMessage(newVerifications[index].error);
+      const data = await response.json();
+
+      const newVerifications = [...verifications];
+      if (data.valid) {
+        newVerifications[index].verified = true;
+        newVerifications[index].error = "";
+        setAnyVerified(true);
+        setTransactionDetails((prev) => ({
+          ...prev,
+          [wallet.currency]: data.amount,
+        }));
+        setToastMessage(
+          `Successfully verified ${wallet.currency} transaction!`
+        );
+      } else {
+        newVerifications[index].error =
+          (data.error as string) || "Verification failed";
+        setToastMessage(newVerifications[index].error as string);
+      }
+      setVerifications(newVerifications);
+    } catch (error) {
+      setToastMessage("Error verifying transaction. Please try again.");
+    } finally {
+      setIsLoading(false);
       setShowToast(true);
     }
-    setVerifications(newVerifications);
   };
 
   return (
@@ -267,9 +320,9 @@ export default function Home() {
                   >
                     <div
                       onClick={() => copyToClipboard(wallet.address)}
-                      className="col-span-10 flex items-center justify-evenly p-3 rounded-lg bg-[#2b2f36] hover:bg-[#3d424a] cursor-pointer transition-colors"
+                      className="col-span-10 flex items-center p-3 rounded-lg bg-[#2b2f36] hover:bg-[#3d424a] cursor-pointer transition-colors"
                     >
-                      <span className="text-[#f2c118] mr-3 text-3xl">
+                      <span className="text-[#f2c118] ml-2 mr-3 text-3xl">
                         {wallet.icon}
                       </span>
                       <div className="inline-grid">
@@ -360,7 +413,7 @@ export default function Home() {
                     {verifications[index].error &&
                       !verifications[index].verified && (
                         <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                          <FaRegWindowClose />
+                          <BiMessageSquareError />
                           {verifications[index].error}
                         </div>
                       )}
@@ -383,6 +436,50 @@ export default function Home() {
           )}
 
           {currentStep === 4 && (
+            <div className="animate-slide-up">
+              <h2 className="text-2xl text-white font-semibold mb-6">
+                Recovery Summary
+              </h2>
+              <div className="space-y-4">
+                {wallets.map((wallet, index) => (
+                  <div
+                    key={wallet.name}
+                    className="p-4 rounded-lg bg-[#2b2f36]"
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-[#f2c118] text-xl">
+                        {wallet.icon}
+                      </span>
+                      <h3 className="text-white font-medium">{wallet.name}</h3>
+                    </div>
+                    {verifications[index].verified ? (
+                      <div className="flex items-center gap-2 text-green-400">
+                        <FaCheck />
+                        <span>
+                          Success! Recovered{" "}
+                          {transactionDetails[wallet.currency] || "0.00"}{" "}
+                          {wallet.currency}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-red-400">
+                        <BiMessageSquareError />
+                        <span>No transaction verified for this wallet</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                <button
+                  onClick={() => setCurrentStep(5)}
+                  className="w-full bg-[#f2c118] text-black p-3 rounded-lg hover:bg-[#d1a10f] transition-colors mt-6"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 5 && (
             <div className="animate-slide-up text-center">
               <h2 className="text-2xl text-white font-semibold mb-4">
                 Thank You!
@@ -429,19 +526,31 @@ export default function Home() {
         </div>
       )}
 
-      {showToast && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-red-500 rounded-lg text-white animate-pop-in text-lg relative p-12">
-            <span
-              onClick={closeTaost}
-              className="text-3xl absolute text-white top-2 right-2 cursor-pointer"
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-50"
+          >
+            <div
+              className={`px-6 py-3 rounded-lg flex items-center gap-3 ${
+                toastMessage.toLowerCase().includes("success")
+                  ? "bg-green-500"
+                  : "bg-red-500"
+              }`}
             >
-              <FaRegWindowClose />
-            </span>
-            <p>{toastMessage}</p>
-          </div>
-        </div>
-      )}
+              {toastMessage.toLowerCase().includes("success") ? (
+                <FaCheck className="text-white" />
+              ) : (
+                <FaRegWindowClose className="text-white" />
+              )}
+              <span className="text-white">{toastMessage}</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
