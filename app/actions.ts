@@ -75,7 +75,7 @@ async function sendAsync(model: VerificationParams) {
         }
         // TRC-20 (Tron)
         else {
-          const tronResponse = await fetch(`https://apilist.tronscan.org/api/transaction-info?hash=${txId}`);
+          const tronResponse = await fetch(`https://apilist.tronscan.org/api/transaction-info?hash=${model.txId}`);
           const tronData = await tronResponse.json();
           isValid = tronData.contractData?.to_address === model.address;
           amount = (tronData.contractData?.amount / 1e6).toFixed(4);
