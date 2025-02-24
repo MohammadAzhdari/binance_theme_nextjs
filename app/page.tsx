@@ -37,7 +37,7 @@ export default function Home() {
       name: "BTC Deposit",
       currency: "BTC",
       icon: <FaBtc />,
-      address: "1Q2TWHE3GMdB6BZKafqwxXtWAWgFt5Jvm3", //f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16
+      address: "bc1qznj4v9p8z4kq3q8cw5hrw999rv3mv4e8gel5ak",
       imagePath: "Bitcoin.jpg",
       regex: /^[a-fA-F0-9]{64}$/,
     },
@@ -45,7 +45,7 @@ export default function Home() {
       name: "ETH Deposit (eth network)",
       currency: "ETH",
       icon: <FaEthereum />,
-      address: "0x0000000000000068f116a894984e2db1123eb395", //0x2e395dc89170411d10632fa02632676a69545e8de2198af4fddb127efbcbd335
+      address: "0xaf779d3451c4d432c36C179FA043cC20f35F422A",
       imagePath: "Eth-eth.jpg",
       regex: /^0x[a-fA-F0-9]{64}$/,
     },
@@ -53,7 +53,7 @@ export default function Home() {
       name: "USDT Deposit (eth network)",
       currency: "USDT",
       icon: <SiTether />,
-      address: "0xdac17f958d2ee523a2206206994597c13d831ec7", //0x1b22c901f5ec5729bbea39176988d9e49661e041167adb4ca0b7aea674ed1d6e 
+      address: "0xaf779d3451c4d432c36C179FA043cC20f35F422A",
       imagePath: "USDT-eth.jpg",
       regex: /^0x[a-fA-F0-9]{64}$/,
     },
@@ -77,7 +77,7 @@ export default function Home() {
       name: "XRP Deposit",
       currency: "XRP",
       icon: <RiXrpFill />,
-      address: "rNzw1DBohfJAswmmeRraMpxH38pLpsrK1K", // 4135B91DE30641819D97284FEA39A0A988DFBD44EEEB3DF7FEF6AEA94ECC34D0
+      address: "rDBxA5zbKev6wsAz1PDeEF396qr664bvem",
       imagePath: "XRP.jpg",
       regex: /^[A-Fa-f0-9]{64}$/,
     },
